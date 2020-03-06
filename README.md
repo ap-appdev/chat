@@ -1,4 +1,4 @@
-# rt-chat2
+# vuely
 
 ## Project setup
 ```
@@ -15,15 +15,7 @@ npm run serve
 npm run build
 ```
 
-### Run your tests
+### Run your end-to-end tests
 ```
-npm run test
+npm run test:e2e
 ```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).

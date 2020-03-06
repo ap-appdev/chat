@@ -1,46 +1,62 @@
 {
-  "name": "rt-chat2",
-  "version": "0.1.0",
+  "name": "vuely",
+  "version": "6.0.2",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "test:e2e": "vue-cli-service test:e2e"
   },
   "dependencies": {
-    "core-js": "^2.6.5",
-    "vue": "^2.6.10"
+    "@types/leaflet": "^1.5.1",
+    "algoliasearch": "^3.33.0",
+    "auth0-js": "^9.11.3",
+    "axios": "^0.19.0",
+    "babel-polyfill": "^6.26.0",
+    "chart.js": "^2.8.0",
+    "echarts": "^4.2.1",
+    "eventemitter3": "^4.0.0",
+    "file-saver": "^2.0.2",
+    "instantsearch.css": "^7.3.1",
+    "jquery": "^3.4.1",
+    "leaflet": "^1.4.0",
+    "moment": "^2.24.0",
+    "nprogress": "^0.2.0",
+    "screenfull": "^4.2.1",
+    "slick-carousel": "^1.8.1",
+    "velocity-animate": "^1.5.2",
+    "vue": "^2.6.10",
+    "vue-chartjs": "^3.4.2",
+    "vue-count-to": "^1.0.13",
+    "vue-draggable-resizable": "^2.0.0-rc1",
+    "vue-echarts": "^4.0.3",
+    "vue-fullcalendar": "^1.0.9",
+    "vue-i18n": "^8.14.0",
+    "vue-loading-spinner": "^1.0.11",
+    "vue-native-notification": "^1.0.5",
+    "vue-notification": "^1.3.16",
+    "vue-perfect-scrollbar": "^0.2.0",
+    "vue-radial-progress": "^0.2.10",
+    "vue-resource": "^1.5.1",
+    "vue-router": "^3.1.2",
+    "vue-slick": "^1.1.15",
+    "vue-socket.io": "^3.0.7",
+    "vue-star-rating": "^1.6.1",
+    "vue2-dropzone": "^3.6.0",
+    "vue2-leaflet": "^2.2.1",
+    "vuedraggable": "^2.20.0",
+    "vuetify": "^2.0.11",
+    "vuex": "^3.0.1",
+    "weather-icons": "^1.3.2",
+    "webpack": "^4.39.3"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.11.0",
-    "@vue/cli-plugin-eslint": "^3.11.0",
     "@vue/cli-service": "^3.11.0",
-    "babel-eslint": "^10.0.1",
-    "eslint": "^5.16.0",
-    "eslint-plugin-vue": "^5.0.0",
+    "deepmerge": "^4.0.0",
+    "fibers": "^4.0.1",
+    "sass": "^1.22.10",
+    "sass-loader": "^7.3.1",
     "vue-template-compiler": "^2.6.10"
-  },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
-    },
-    "extends": [
-      "plugin:vue/essential",
-      "eslint:recommended"
-    ],
-    "rules": {},
-    "parserOptions": {
-      "parser": "babel-eslint"
-    }
-  },
-  "postcss": {
-    "plugins": {
-      "autoprefixer": {}
-    }
-  },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions"
-  ]
+  }
 }
