@@ -25,9 +25,23 @@
 					<sidebar-item :key="index" :item="item" role></sidebar-item>
 				</template>
 				<v-list-group
-					prepend-icon="group"
-					v-for="group in skillGroups"
-					:key="group.id"
+						v-if="newMessages.count > 0"
+						prepend-icon="message"
+				>
+					<template v-slot:activator>
+						<v-list-item-title>{{$t('message.newMessages')}}</v-list-item-title>
+						<v-list-item-icon class="d-table">
+							<v-chip small class="primary">{{newMessages.count}}</v-chip>
+						</v-list-item-icon>
+					</template>
+					<template v-for="(item, index) in newMessages.chats">
+						<sidebar-item :key="index" :item="item"></sidebar-item>
+					</template>
+				</v-list-group>
+				<v-list-group
+						prepend-icon="group"
+						v-for="group in skillGroups"
+						:key="group.id"
 				>
 					<template v-slot:activator>
 						<v-list-item-title>{{group.name}}</v-list-item-title>
@@ -50,8 +64,8 @@
 
 <script>
 	import { mapGetters } from "vuex";
-	import { getCurrentAppLayout } from "Helpers/helpers";
-	import UserBlock from "Components/_Sidebar/UserBlock";
+	import { getCurrentAppLayout, convertDateToTimeStamp } from "Helpers/helpers";
+	import UserBlock from "Components/Sidebar/UserBlock";
 	import SidebarRoleUsers from "./partials/SidebarRoleUsers";
 	import SidebarItem from "./partials/SidebarItem";
 
@@ -86,6 +100,24 @@
 					let bName = b.type === 'group' ? b.name : b.fio;
 					return (aName.toLowerCase() > bName.toLowerCase()) ? 1 : -1;
 				});
+			},
+			newMessages() {
+				let chats = this.skillGroups.filter(group => !!group.unread_count);
+				this.skillGroups.forEach(function (group) {
+					let users = group.users.filter(user => !!user.unread_count);
+					users.forEach(user => {
+						if(chats.findIndex(item => item.agent_id === user.agent_id) === -1) chats.push(user);
+					});
+				});
+				chats.sort((a, b) => {
+					let aDate = a.messages[a.messages.length - 1].date;
+					let bDate = b.messages[b.messages.length - 1].date;
+					return (convertDateToTimeStamp(aDate, 'YYYY-MM-DDTHH:mm:ss.SSS') < convertDateToTimeStamp(bDate, 'YYYY-MM-DDTHH:mm:ss.SSS')) ? 1 : -1;
+				});
+				let count = chats.reduce(function(count, chat) {
+					return count + +chat.unread_count;
+				}, 0);
+				return {count, chats};
 			}
 		},
 		data() {

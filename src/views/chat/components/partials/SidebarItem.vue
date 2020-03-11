@@ -15,13 +15,37 @@
 			</v-avatar>
 		</template>
 		<v-list-item-content class="py-0">
-			<h6 class="mb-1">{{item.type === 'group' ? $t('message.generalChat') + ' ' + item.name : item.fio}}</h6>
-			<span v-if="!!role && !!item.role_name" class="fs-12 grey--text fw-normal">{{item.role_name}}</span>
+			<v-list-item-title class="mb-1 fw-semi-bold fs-14 d-flex">
+				{{item.type === 'group' ? $t('message.generalChat') + ' ' + item.name : item.fio}}
+				<v-spacer></v-spacer>
+				<v-chip v-if="!!item.unread_count" x-small class="primary ml-2 font-weight-regular">{{item.unread_count}}</v-chip>
+			</v-list-item-title>
+			<v-list-item-subtitle v-if="!!role && !!item.role_name" class="fs-12 fw-normal grey--text">{{item.role_name}}</v-list-item-subtitle>
 			<template v-if="!role && !!item.messages && item.messages.length > 0">
-				<span class="fs-12 grey--text fw-normal">{{getPreviewTextChat(item.messages[item.messages.length - 1])}}</span>
-				<span class="fs-12 fw-normal">{{getDateTimeMessage(item.messages[item.messages.length - 1].date)}}</span>
+				<v-list-item-subtitle class="fs-12 fw-normal">{{getPreviewTextChat(item.messages[item.messages.length - 1])}}</v-list-item-subtitle>
+				<v-list-item-subtitle class="fs-12 fw-normal grey--text d-flex" :class="{'primary--text': item.messages[item.messages.length - 1].unread}">
+					<v-spacer></v-spacer>
+					{{getDateTimeMessage(item.messages[item.messages.length - 1].date)}}
+				</v-list-item-subtitle>
 			</template>
 		</v-list-item-content>
+<!--		<v-list-item-action class="my-0">-->
+<!--			<v-list-item-action-text class="fw-semi-bold fs-14 primary&#45;&#45;text">5</v-list-item-action-text>-->
+<!--			<v-chip color="primary">5</v-chip>-->
+<!--			<v-icon-->
+<!--					v-if="!active"-->
+<!--					color="grey lighten-1"-->
+<!--			>-->
+<!--				star_border-->
+<!--			</v-icon>-->
+
+<!--			<v-icon-->
+<!--					v-else-->
+<!--					color="yellow"-->
+<!--			>-->
+<!--				star-->
+<!--			</v-icon>-->
+<!--		</v-list-item-action>-->
 	</v-list-item>
 </template>
 

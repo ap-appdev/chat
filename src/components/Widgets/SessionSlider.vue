@@ -52,15 +52,15 @@ export default {
   },
   methods: {
     getTestimonials() {
-      api
-        .get("testimonials.js")
-        .then(response => {
-          this.loader = false;
-          this.testimonials = response.data;
-        })
-        .catch(error => {
-          console.log(error);
-        });
+      // api
+      //   .get("testimonials.js")
+      //   .then(response => {
+      //     this.loader = false;
+      //     this.testimonials = response.data;
+      //   })
+      //   .catch(error => {
+      //     console.log(error);
+      //   });
     }
   }
 };

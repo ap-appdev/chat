@@ -6,7 +6,7 @@
 			</template>
 			<template v-else>
 				<v-avatar :class="!!user.color ? user.color : 'accent'" size="40">
-					<span small class="white--text"> {{user.fio.f.charAt(0) + user.fio.i.charAt(0)}}</span>
+					<span small class="white--text"> {{user.fio.f.charAt(0)}}</span>
 				</v-avatar>
 			</template>
 		</v-list-item-avatar>

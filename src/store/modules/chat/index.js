@@ -199,6 +199,7 @@ const mutations = {
             if(!!state.skillGroups) state.skillGroups.forEach(function (group) {
                 let user = group.users.find(user => user.agent_id === chat_agent_id);
                 if(user) {
+                    if (message.id_sender !== authUser.agent_id) user.unread_count = +user.unread_count + 1;
                     if (!!user.messages)
                         user.messages.push(message);
                     else
@@ -215,12 +216,13 @@ const mutations = {
             let skillGroup = state.skillGroups.find(group => group.id === message.id_skill_recipient);
             selected = selectedChat.id === skillGroup.id;
             if(skillGroup) {
+                if (message.id_sender !== authUser.agent_id) skillGroup.unread_count = +skillGroup.unread_count + 1;
                 if (!!skillGroup.messages)
                     skillGroup.messages.push(message);
                 else
                     skillGroup.messages = [message];
                 notify.title = skillGroup.name;
-                notify.text =  + ': ' + message.message;
+                notify.text = message.message;
                 notify.data.chat = skillGroup;
                 notify.data.title = message.fio_sender;
             }
