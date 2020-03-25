@@ -23,10 +23,11 @@
 			<v-list-item-subtitle v-if="!!role && !!item.role_name" class="fs-12 fw-normal grey--text">{{item.role_name}}</v-list-item-subtitle>
 			<template v-if="!role && !!item.messages && item.messages.length > 0">
 				<v-list-item-subtitle class="fs-12 fw-normal">{{getPreviewTextChat(item.messages[item.messages.length - 1])}}</v-list-item-subtitle>
-				<v-list-item-subtitle class="fs-12 fw-normal grey--text d-flex" :class="{'primary--text': item.messages[item.messages.length - 1].unread}">
+				<v-list-item-subtitle class="fs-12 d-flex align-center" :class="item.messages[item.messages.length - 1].unread ? 'primary--text fw-semi-bold' : 'grey--text fw-normal'">
 					<v-spacer></v-spacer>
+					<v-icon v-if="getUser.agent_id == item.messages[item.messages.length - 1].id_sender" small class="mr-1" :color="!item.messages[item.messages.length - 1].notread_count ? 'success' : 'grey lighten-1'">mdi-check-all</v-icon>
 					{{getDateTimeMessage(item.messages[item.messages.length - 1].date)}}
-				</v-list-item-subtitle>
+					</v-list-item-subtitle>
 			</template>
 		</v-list-item-content>
 <!--		<v-list-item-action class="my-0">-->
@@ -64,7 +65,7 @@
 			countUnread: Number
 		},
 		computed: {
-			...mapGetters(["selectedChat"]),
+			...mapGetters(["selectedChat", "getUser"]),
 			selected() {
 				return !!this.selectedChat && ((this.selectedChat.type === 'group' && this.selectedChat.id == this.item.id) || (this.selectedChat.type === 'user' && this.selectedChat.agent_id == this.item.agent_id));
 			}

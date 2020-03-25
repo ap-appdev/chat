@@ -23,6 +23,21 @@
             }
          }
 		}
+      .chat-wrapper {
+         .chat-area-scroll {
+            //background-image: url("/static/img/bg-ingrape.png");
+            //background-repeat: repeat;
+         }
+      }
+      .show-chip-date {
+         position: absolute;
+         z-index: 4;
+         top: 16px;
+         width: 100%;
+         .chip-white {
+            background-color: white !important;
+         }
+      }
 		.chat-body {
            //padding-bottom: 0 !important;
            .separator {

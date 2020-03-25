@@ -1,17 +1,14 @@
-/**
- * Auth Module
- */
 import Vue from 'vue'
 import api from "Api";
-import FileSaver from "file-saver";
-// import object from "auth0-js/src/helper/object";
 
 const state = {
     skillGroups: null,
     offlineUsers: localStorage.getItem('offline-users') || false,
     loadingChatModule: false,
     selectedChat: null,
+    firstIdUnreadMessage: null,
     loadingChat: false,
+    loadingMessages: false,
     chatSidebar: false
 };
 
@@ -29,8 +26,16 @@ const getters = {
     selectedChat: state => {
         return state.selectedChat
     },
+    firstIdUnreadMessage: state => {
+        // const message = state.selectedChat.messages ? state.selectedChat.messages.find(message => message.unread) : null;
+        // return message ? message.id : null;
+        return state.firstIdUnreadMessage
+    },
     loadingChat: state => {
         return state.loadingChat
+    },
+    loadingMessages: state => {
+        return state.loadingMessages
     },
     chatSidebar: state => {
         return state.chatSidebar
@@ -43,12 +48,13 @@ const actions = {
         return commit('cleanChat', payload);
     },
     getUsers(context) {
-        context.commit('getUsers');
+        context.commit('loadingChatModule', true);
         return new Promise((resolve, reject) => {
             api.get("users").then(response => {
-                context.commit('getUsersSuccess', response.data);
-                console.log(response)
+                context.commit('setUsers', response.data);
                 resolve(response)
+            }).finally(() => {
+                context.commit('loadingChatModule', false);
             });
         });
     },
@@ -83,22 +89,28 @@ const actions = {
         } else return false;
         return check;
     },
-    async openChat({state, commit, dispatch}, payload) {
-        if(state.selectedChat == payload) return Promise.resolve();
+    async openChat({ getters, commit, dispatch }, payload) {
+        if(getters.selectedChat == payload) return Promise.resolve();
+        commit('loadingChat', true);
         let check =  await dispatch('checkChat', payload);
         if(!check.view) return Promise.reject(403);
         payload.check = check;
-        commit('loadChat', payload);
-        let chat =  await dispatch('getCleanChat', payload);
-        return api.post("messages", chat).then(response => {
-            commit('loadChatSuccess', response.data);
-        }).catch(error => {
-            commit('loadChatError');
+        commit('setChat', payload);
+        commit('loadingChat', false);
+    },
+    async getMessages({getters, commit, dispatch}) {
+        commit('loadingMessages', true);
+        let chat = await dispatch('getCleanChat', getters.selectedChat);
+        let last = !!getters.selectedChat.messages && getters.selectedChat.messages[0] ? getters.selectedChat.messages[0].id : 0;
+        return api.post("messages", { chat, last }).then(response => {
+            commit('appendChatMessages', response.data);
+            return Promise.resolve(response);
+        }).finally(() => {
+            commit('loadingMessages', false);
         });
     },
     async sendAttachments({commit, dispatch, getters}, payload) {
         let chat = getters.selectedChat;
-        console.log(payload)
         let check =  await dispatch('checkChat', chat);
         if(!check.write) return Promise.reject(403);
         payload.append('chat', JSON.stringify(await dispatch('getCleanChat', chat)));
@@ -108,14 +120,13 @@ const actions = {
             }
         });
     },
-    async getAllAttachments({getters}) {
+    async getAllAttachments({getters, dispatch}) {
         return api.post("messages/attachments/get", {
-            chat: getters.selectedChat
+            chat: await dispatch('getCleanChat', getters.selectedChat)
         });
     },
     async sendMessage({commit, dispatch, getters}, payload) {
         let chat = getters.selectedChat;
-        console.log(payload)
         let check =  await dispatch('checkChat', chat);
         if(!check.write) return Promise.reject(403);
         let message = {
@@ -136,6 +147,10 @@ const actions = {
     SOCKET_newMessage({commit, rootGetters}, payload) {
         let authUser = rootGetters.getUser;
         commit('newMessage', {message: payload, authUser});
+    },
+    SOCKET_readMessage({commit, rootGetters}, payload) {
+        let authUser = rootGetters.getUser;
+        commit('readMessage', {message: payload, authUser});
     }
 }
 
@@ -145,12 +160,11 @@ const mutations = {
         state.skillGroups = null;
         state.selectedChat = null;
     },
-    getUsers(state) {
-        state.loadingChatModule = true;
+    loadingChatModule(state, boolean) {
+        state.loadingChatModule = boolean;
     },
-    getUsersSuccess(state, skillGroups) {
+    setUsers(state, skillGroups) {
         state.skillGroups = skillGroups;
-        state.loadingChatModule = false;
     },
     userConnect(state, agent_id) {
         if(!!state.skillGroups) state.skillGroups.forEach(function (group) {
@@ -168,7 +182,13 @@ const mutations = {
         state.offlineUsers = status;
         localStorage.setItem('offline-users', status);
     },
-    loadChat(state, chat) {
+    loadingChat(state, boolean) {
+        state.loadingChat = boolean;
+    },
+    setChat(state, chat) {
+        if(state.selectedChat && Array.isArray(state.selectedChat.messages) && state.selectedChat.messages.length) {
+            state.selectedChat.messages = [state.selectedChat.messages.pop()];
+        }
         if(chat.type === 'user') {
             let skillGroup = state.skillGroups.find(group => group.id === chat.skill_id);
             if(!!skillGroup) {
@@ -176,17 +196,22 @@ const mutations = {
                 chat.role = skillGroup.roles.find(role => role.id === chat.role_id);
             }
         }
-        state.loadingChat = true;
         state.selectedChat = chat;
         state.chatSidebar = false;
     },
-    loadChatSuccess(state, messages) {
-        state.loadingChat = false;
-        state.selectedChat.messages = messages;
+    loadingMessages(state, boolean) {
+        state.loadingMessages = boolean;
     },
-    loadChatError(state) {
-        state.selectedChat = null;
-        state.loadingChat = false;
+    appendChatMessages(state, messages) {
+        if (!state.selectedChat) return false;
+        // if (!!user.messages)
+        //     user.messages.push(message);
+        // else
+        //     user.messages = [message];
+        // state.selectedChat.messages.unshift(...messages);
+        const message = messages.find(message => message.unread);
+        state.firstIdUnreadMessage = message ? message.id : state.firstIdUnreadMessage;
+        state.selectedChat.messages = messages.concat(!!state.selectedChat.messages ? state.selectedChat.messages : [])
     },
     newMessage(state, data) {
         let {message, authUser} = data;
@@ -199,7 +224,7 @@ const mutations = {
             if(!!state.skillGroups) state.skillGroups.forEach(function (group) {
                 let user = group.users.find(user => user.agent_id === chat_agent_id);
                 if(user) {
-                    if (message.id_sender !== authUser.agent_id) user.unread_count = +user.unread_count + 1;
+                    if (message.unread) user.unread_count = +user.unread_count + 1;
                     if (!!user.messages)
                         user.messages.push(message);
                     else
@@ -216,7 +241,7 @@ const mutations = {
             let skillGroup = state.skillGroups.find(group => group.id === message.id_skill_recipient);
             selected = selectedChat.id === skillGroup.id;
             if(skillGroup) {
-                if (message.id_sender !== authUser.agent_id) skillGroup.unread_count = +skillGroup.unread_count + 1;
+                if (message.unread) skillGroup.unread_count = +skillGroup.unread_count + 1;
                 if (!!skillGroup.messages)
                     skillGroup.messages.push(message);
                 else
@@ -237,10 +262,34 @@ const mutations = {
             });
         }
     },
+    readMessage(state, data) {
+        let { message, authUser } = data;
+        if (message.type_message === 1) {
+            let chat_agent_id = message.id_sender === authUser.agent_id ? message.id_recipient : message.id_sender;
+            if(!!state.skillGroups) state.skillGroups.map(function (group) {
+                let user = group.users.find(user => user.agent_id === chat_agent_id);
+                if (user) readMessageChat(authUser, user, message);
+            });
+        } else {
+            let skillGroup = state.skillGroups.find(group => group.id === message.id_skill_recipient);
+            if (skillGroup) readMessageChat(authUser, skillGroup, message);
+        }
+    },
     toggleChatSidebarHandler(state, val) {
         state.chatSidebar = val;
     }
 };
+
+function readMessageChat(authUser, chat, message) {
+    if (message.id_sender !== authUser.agent_id) chat.unread_count = +chat.unread_count > 0 ? (+chat.unread_count - 1) : 0;
+    if (!!chat.messages) {
+        let mess = chat.messages.find(mess => mess.id === message.id);
+        if(mess) {
+            if (mess.id_sender !== authUser.agent_id) mess.unread = false;
+            else mess.notread_count = +mess.notread_count > 0 ? (+mess.notread_count - 1) : 0;
+        }
+    }
+}
 
 export default {
     state,

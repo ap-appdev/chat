@@ -8,11 +8,11 @@ import moment from 'moment';
 const config = require('../config');
 // Get Date
 
-export function getDateTimeMessage(date) {
+export function getDateTimeMessage(date, format) {
 	let localUTC = moment().utcOffset();
 	let newDate = moment(date).utc().utcOffset(localUTC - config.serverUTC);
-	let format = moment().format('DD.MM.YYYY') === newDate.format('DD.MM.YYYY') ? 'HH:mm' : 'DD.MM.YYYY HH:mm';
-	return newDate.format(format);
+	let defFormat = moment().format('DD.MM.YYYY') === newDate.format('DD.MM.YYYY') ? 'HH:mm' : 'DD.MM.YYYY HH:mm';
+	return newDate.format(format || defFormat);
 }
 
 export function getDateLocalUTC(date, format) {

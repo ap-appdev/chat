@@ -59,9 +59,30 @@
 						</v-menu>
 					</div>
 				</v-toolbar>
-				<vue-perfect-scrollbar :style="chatBodyHeight" class="chat-area-scroll" :settings="settings">
-					<chat-area-body :messages="selectedChat.messages" :height="chatBodyHeight"></chat-area-body>
-				</vue-perfect-scrollbar>
+				<div class="pos-relative" :style="chatBodyHeight">
+					<transition name="fade">
+						<div class="text-center show-chip-date" v-show="showDate">
+							<v-chip
+									outlined
+									small
+									class="ma-2 grey--text chip-white"
+							>{{showDate}}</v-chip>
+						</div>
+					</transition>
+					<vue-perfect-scrollbar id="scroll-area-body" class="chat-area-scroll h-100" :settings="settings" infinite-wrapper>
+						<infinite-loading direction="top" @infinite="infiniteMessages">
+							<div slot="spinner" class="mt-7"><single-chat-loader></single-chat-loader></div>
+							<div slot="no-more"></div>
+							<div slot="no-results"></div>
+						</infinite-loading>
+						<chat-area-body v-scroll:#scroll-area-body="onScroll" :messages="selectedChat.messages" :height="chatBodyHeight" @scrollTo="scrollTo"></chat-area-body>
+					</vue-perfect-scrollbar>
+					<transition name="fade">
+						<v-btn v-show="showScrollToEnd" fab small class="v-btn--absolute v-btn--right" style="bottom: 16px" @click.stop="scrollToEnd">
+							<v-icon color="grey" size="32">mdi-chevron-down</v-icon>
+						</v-btn>
+					</transition>
+				</div>
 				<div class="chat-footer pa-4" ref="chatFooter" v-if="selectedChat.check.write">
 					<div class="d-custom-flex" style="align-items: flex-end;">
 						<v-textarea
@@ -78,7 +99,6 @@
 							class="mr-4 mt-0 pt-2 chat-textarea"
 							v-on:keyup.ctrl.enter="sendMessage"
 						></v-textarea>
-
 						<v-tooltip left>
 							<template v-slot:activator="{ on }">
 								<v-btn fab small v-on="on" @click.stop="openAttachment">
@@ -91,7 +111,6 @@
 							<v-icon dark>send</v-icon>
 						</v-btn>
 					</div>
-
 					<!-- Dialog attachment -->
 					<v-dialog v-model="attachment" max-width="600px">
 						<v-card>
@@ -127,7 +146,6 @@
 						</v-card>
 					</v-dialog>
 				</div>
-
 				<!-- All attachment -->
 				<v-dialog v-model="allAttachments" max-width="1130px">
 					<v-card>
@@ -144,8 +162,12 @@
 							</v-btn>
 						</v-card-title>
 						<v-card-text>
-							<vue-perfect-scrollbar style="max-height: calc(100vh - 183px)" class="chat-area-scroll">
-								<chat-area-body-files :files="allAttachmentsFiles" :all="true"></chat-area-body-files>
+							<vue-perfect-scrollbar style="max-height: calc(100vh - 183px)">
+								<div v-if="!allAttachmentsFiles || !allAttachmentsFiles.length">
+									<p class="d-flex justify-center"><i class="zmdi zmdi-file font-3x grey--text"></i></p>
+									<p class="d-flex justify-center grey--text">{{$t('message.noAttachments')}}</p>
+								</div>
+								<chat-area-body-files v-else :files="allAttachmentsFiles" :all="true"></chat-area-body-files>
 							</vue-perfect-scrollbar>
 						</v-card-text>
 					</v-card>
@@ -165,6 +187,7 @@
 
 <script>
 import { mapGetters } from "vuex";
+import InfiniteLoading from 'vue-infinite-loading';
 import SingleChatLoader from "./SingleChatLoader";
 import ChatAreaBody from "./ChatAreaBody";
 import ChatAreaBodyFiles from "./ChatAreaBodyFiles";
@@ -172,11 +195,22 @@ import { getCurrentAppLayout, handlingErrors } from "Helpers/helpers";
 
 export default {
 	computed: {
-		...mapGetters(["selectedLocale", "getUser", "selectedChat", "loadingChat"]),
+		...mapGetters(["selectedLocale", "getUser", "selectedChat", "loadingChat", "loadingMessages"]),
 		chatBodyHeight: function () {
 			let footerHeight = this.selectedChat.check.write ? +this.footer : 0;
 			let h = footerHeight + 65;
 			return "height: calc(100vh - " + h + "px)";
+		},
+		firstMessage: function () {
+			return this.selectedChat.messages && this.selectedChat.messages.length ? this.selectedChat.messages[0] : null
+		},
+		lastMessage: function () {
+			return this.selectedChat.messages && this.selectedChat.messages.length ? this.selectedChat.messages[this.selectedChat.messages.length - 1] : null
+		},
+		showScrollToEnd: function () {
+			if(this.scrollHeight && this.scrollPosition !== null) {
+				return this.scrollHeight >= (this.scrollPosition + this.offsetHeight + 1000)
+			} else return false
 		}
 	},
 	data() {
@@ -194,18 +228,25 @@ export default {
 			attachFiles: null,
 			attachCaption: "",
 			attachLoading: false,
-			footer: 73//81
+			footer: 73,
+			offsetHeight: null,
+			scrollHeight: null,
+			scrollPosition: null,
+			showDate: ''
 		};
 	},
 	components: {
 		SingleChatLoader,
 		ChatAreaBody,
-		ChatAreaBodyFiles
+		ChatAreaBodyFiles,
+		InfiniteLoading
 	},
 	watch: {
 		selectedChat: {
 			handler: function (after, before) {
-				if(after !== before) this.newMessage = '';
+				if(after !== before) {
+					this.newMessage = '';
+				}
 			}
 		},
 		newMessage: function (newMessage) {
@@ -213,16 +254,9 @@ export default {
 			else this.footer = this.$refs.chatFooter.clientHeight;
 		}
 	},
-	mounted(){
-		this.scrollToEnd();
-	},
-	updated(){
-		if(this.newMessage == ''){
-			this.scrollToEnd();
-		}
-	},
 	methods: {
 		openAllAttachments() {
+			this.allAttachmentsFiles = null;
 			this.allAttachments = true;
 			this.attachLoading = true;
 			this.$store.dispatch("getAllAttachments").then((res) => {
@@ -238,7 +272,6 @@ export default {
 			this.attachment = !this.attachment;
 		},
 		sendAttachments() {
-			console.log(this.attachFiles)
 			if(!this.$refs.attachForm.validate() || !Array.isArray(this.attachFiles) || this.attachFiles.length === 0) return false;
 			this.attachLoading = true;
 			let formData = new FormData();
@@ -250,14 +283,12 @@ export default {
 				this.attachment = !this.attachment;
 			}).catch(handlingErrors).finally(() => {
 				this.attachLoading = false;
-			});
-			this.scrollToEnd();
+			}).finally(this.scrollToEnd);
 		},
 		sendMessage() {
 			if (this.newMessage !== "") {
-				this.$store.dispatch("sendMessage", this.newMessage).catch(handlingErrors);
+				this.$store.dispatch("sendMessage", this.newMessage).catch(handlingErrors).finally(this.scrollToEnd);
 				this.newMessage = "";
-				this.scrollToEnd();
 			}
 		},
 		toggleChatSidebar() {
@@ -281,12 +312,49 @@ export default {
 			}
 		},
 		scrollToEnd() {
-			var container = document.querySelector(".chat-area-scroll");
-			if(container !== null){
-				var scrollHeight = container.scrollHeight;
-				container.scrollTop = scrollHeight;
-			}	
+			this.scrollTo('#message-' + this.lastMessage.id)
+		},
+		scrollTo (el) {
+			this.$vuetify.goTo(el, {
+				duration: 300,
+				container: '.chat-area-scroll',
+				offset: 15
+			})
+		},
+		onScroll (e) {
+			this.offsetHeight = e.target.offsetHeight;
+			this.scrollHeight = e.target.scrollHeight;
+			this.scrollPosition = e.target.scrollTop;
+
+			let showDate = { date: '', scrollTop: 0 };
+			let dates = e.target.getElementsByClassName('date-messages');
+			[].forEach.call(dates, function(date) {
+				let scrollTop = date.offsetTop - e.target.scrollTop;
+				if (scrollTop < 0 && (scrollTop > showDate.scrollTop || !showDate.scrollTop)) {
+					showDate = { date: date.innerText, scrollTop: scrollTop };
+				}
+			});
+			this.showDate = showDate.date;
+		},
+		infiniteMessages($state) {
+			setTimeout(() => {
+				this.$store.dispatch("getMessages").then(({ data }) => {
+					if (data.length) {
+						$state.loaded();
+					} else {
+						$state.complete();
+					}
+				});
+			}, 1000);
 		}
 	}
 };
 </script>
+<style scoped>
+	.fade-enter-active, .fade-leave-active {
+		transition: opacity .5s;
+	}
+	.fade-enter, .fade-leave-to /* .fade-leave-active до версии 2.1.8 */ {
+		opacity: 0;
+	}
+</style>

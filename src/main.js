@@ -1,3 +1,4 @@
+const config = require('./config');
 import 'babel-polyfill';
 import Vue from 'vue'
 import vuetify from '@/plugins/vuetify'
@@ -33,19 +34,20 @@ if (!!token) {
 
 // Socket
 import VueSocketIO from 'vue-socket.io'
+Vue.use(new VueSocketIO({
+	debug: true,
+	connection: config.io.connection,
+	vuex: {
+		store,
+		actionPrefix: config.io.actionPrefix
+	}
+}));
 
 import moment from 'moment'
 moment.locale(store.getters.selectedLocale.locale);
 
-Vue.use(new VueSocketIO({
-	debug: true,
-	connection: 'http://10.136.210.204:3000',
-	vuex: {
-		store,
-		actionPrefix: 'SOCKET_'
-	}
-}));
-
+import VueObserveVisibility from 'vue-observe-visibility'
+Vue.use(VueObserveVisibility);
 
 Vue.config.productionTip = false;
 
