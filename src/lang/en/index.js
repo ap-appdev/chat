@@ -5,6 +5,12 @@ export default {
     403: 'You do not have enough rights',
     LIMIT_FILE_SIZE: 'File size exceeded'
   },
+  appName: 'Chat InGrape',
+  enterUsernameAndPassword: 'Enter your login and password to enter the chat',
+  Login: 'Login',
+  LoginRequired: 'Login is required',
+  Password: 'Password',
+  PasswordRequired: 'Password is required',
   unreadMessages: 'Unread messages',
   requiredFiles: 'You must select files',
   language: 'Language',

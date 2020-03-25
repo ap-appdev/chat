@@ -5,6 +5,12 @@ export default {
       403: 'У вас не достаточно прав',
       LIMIT_FILE_SIZE: 'Превышен размер загружаемого файла'
    },
+   appName: 'Чат InGrape',
+   enterUsernameAndPassword: 'Введите ваш логин и пароль для входа в чат',
+   Login: 'Логин',
+   LoginRequired: 'Необходимо ввести логин',
+   Password: 'Пароль',
+   PasswordRequired: 'Необходимо ввести пароль',
    unreadMessages: 'Непрочитанные сообщения',
    requiredFiles: 'Необходимо выбрать файлы',
    language: 'Язык',

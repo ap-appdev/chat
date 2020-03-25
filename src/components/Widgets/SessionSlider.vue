@@ -52,6 +52,8 @@ export default {
   },
   methods: {
     getTestimonials() {
+      this.loader = false;
+      this.testimonials = [];
       // api
       //   .get("testimonials.js")
       //   .then(response => {

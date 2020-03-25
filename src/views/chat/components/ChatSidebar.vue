@@ -86,7 +86,7 @@
 				}
 			},
 			foundChats() {
-				if (!this.search || this.search.length < 3) return [];
+				if (!this.search || this.search.length < 3 || !this.skillGroups) return [];
 				let vue = this;
 				let foundChats = this.skillGroups.filter(group => group.name.toLowerCase().indexOf(vue.search.toLowerCase()) !== -1);
 				this.skillGroups.forEach(function (group) {
@@ -102,6 +102,7 @@
 				});
 			},
 			newMessages() {
+				if(!this.skillGroups) return {count: 0, chats: []};
 				let chats = this.skillGroups.filter(group => !!group.unread_count);
 				this.skillGroups.forEach(function (group) {
 					let users = group.users.filter(user => !!user.unread_count);
@@ -144,6 +145,7 @@
 					: group.users.filter(user => user.role_id === role.id);
 			},
 			onlineUsers(id) {
+				if(!this.skillGroups) return '';
 				let skillGroup = this.skillGroups.find(group => group.id === id);
 				let onlineUsers = {
 					all: skillGroup.users.length,

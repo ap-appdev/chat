@@ -449,6 +449,8 @@ hr {
 
 .theme--light {
    &.v-application {
+      background: $body-bg-image;
+      background-size: cover;
       background-color: $body-bg;
       color: $body-color;
    }

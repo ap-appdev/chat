@@ -59,7 +59,7 @@
 						</v-menu>
 					</div>
 				</v-toolbar>
-				<div class="pos-relative" :style="chatBodyHeight">
+				<div class="pos-relative chat-body-container" :style="chatBodyHeight">
 					<transition name="fade">
 						<div class="text-center show-chip-date" v-show="showDate">
 							<v-chip

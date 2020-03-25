@@ -25,7 +25,7 @@
 				<v-list-item-subtitle class="fs-12 fw-normal">{{getPreviewTextChat(item.messages[item.messages.length - 1])}}</v-list-item-subtitle>
 				<v-list-item-subtitle class="fs-12 d-flex align-center" :class="item.messages[item.messages.length - 1].unread ? 'primary--text fw-semi-bold' : 'grey--text fw-normal'">
 					<v-spacer></v-spacer>
-					<v-icon v-if="getUser.agent_id == item.messages[item.messages.length - 1].id_sender" small class="mr-1" :color="!item.messages[item.messages.length - 1].notread_count ? 'success' : 'grey lighten-1'">mdi-check-all</v-icon>
+					<v-icon v-if="getUser && getUser.agent_id === item.messages[item.messages.length - 1].id_sender" small class="mr-1" :color="!item.messages[item.messages.length - 1].notread_count ? 'success' : 'grey lighten-1'">mdi-check-all</v-icon>
 					{{getDateTimeMessage(item.messages[item.messages.length - 1].date)}}
 					</v-list-item-subtitle>
 			</template>
