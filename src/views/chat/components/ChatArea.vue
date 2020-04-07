@@ -28,9 +28,9 @@
 								<span class="grey--text fs-12 d-inline-block fw-normal mt-2" v-if="!!selectedChat.status">{{$t('message.online')}}</span>
 <!--								<span class="grey&#45;&#45;text fs-12 d-inline-block fw-normal" v-else>Last seen {{selectedChat.lastSeen}}</span>-->
 							</div>
-							<div class="media-right ml-4">
-								<v-text-field text solo prepend-icon="search" clearable :placeholder="$t('message.search')" v-model="searchMessage" class="search-bar d-flex"></v-text-field>
-							</div>
+<!--							<div class="media-right ml-4">-->
+<!--								<v-text-field text solo prepend-icon="search" clearable :placeholder="$t('message.search')" v-model="searchMessage" class="search-bar d-flex"></v-text-field>-->
+<!--							</div>-->
 						</div>
 					</div>
 					<div class="chat-head-right">

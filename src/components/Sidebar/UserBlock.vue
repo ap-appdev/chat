@@ -17,16 +17,16 @@
 			</v-list-item-title>
 		</v-list-item-content>
 
-	   <language-provider></language-provider>
-		<v-menu 
+<!--		<language-provider></language-provider>-->
+		<v-menu
 			bottom
 			offset-y
 			left
-			content-class="userblock-dropdown" 
+			content-class="userblock-dropdown"
 			nudge-top="-10"
 			nudge-right="0"
 			transition="slide-y-transition"
-		>	
+		>
 			<template v-slot:activator="{ on }">
 				<v-btn dark icon v-on="on" class="ma-0">
 					<v-icon>more_vert</v-icon>

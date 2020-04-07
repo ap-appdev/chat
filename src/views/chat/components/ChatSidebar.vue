@@ -129,6 +129,9 @@
 				search: ''
 			};
 		},
+		mounted () {
+			// this.$vuetify.theme.dark = true;
+		},
 		methods: {
 			getScrollHeight() {
 				let layout = getCurrentAppLayout(this.$router);

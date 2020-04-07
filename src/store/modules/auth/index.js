@@ -1,7 +1,6 @@
 /**
  * Auth Module
  */
-import Vue from 'vue'
 import Nprogress from 'nprogress';
 import api from "Api";
 import router from '../../../router'

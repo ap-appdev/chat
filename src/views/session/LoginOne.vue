@@ -56,14 +56,14 @@
 			return {
 				checkbox: false,
 				valid: false,
-				login: "1008",
+				login: "",
 				emailRules: [
 					v => !!v || this.$t('message.LoginRequired'),
 					// v =>
 					// 	/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(v) ||
 					// 	"E-mail must be valid"
 				],
-				password: "92209",
+				password: "",
 				passwordRules: [v => !!v || this.$t('message.PasswordRequired')],
 				appLogo: AppConfig.appLogo2,
 				brand: AppConfig.brand

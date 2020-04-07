@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import api from "Api";
+import { handlingErrors } from "Helpers/helpers";
 
 const state = {
     skillGroups: null,
@@ -53,7 +54,7 @@ const actions = {
             api.get("users").then(response => {
                 context.commit('setUsers', response.data);
                 resolve(response)
-            }).finally(() => {
+            }).catch(handlingErrors).finally(() => {
                 context.commit('loadingChatModule', false);
             });
         });
@@ -123,7 +124,7 @@ const actions = {
     async getAllAttachments({getters, dispatch}) {
         return api.post("messages/attachments/get", {
             chat: await dispatch('getCleanChat', getters.selectedChat)
-        });
+        }).catch(handlingErrors);
     },
     async sendMessage({commit, dispatch, getters}, payload) {
         let chat = getters.selectedChat;
