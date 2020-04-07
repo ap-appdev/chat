@@ -10,8 +10,8 @@ const LoginOne = () => import('Views/session/LoginOne');
 Vue.use(Router)
 
 export default new Router({
-	base: '/chat', // for prod
-	// base: '/',
+	//base: '/chat', // for prod
+	base: '/',
 	mode: 'history',
 	routes: [
 		chat,
