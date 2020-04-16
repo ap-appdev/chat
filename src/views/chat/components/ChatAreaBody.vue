@@ -1,7 +1,7 @@
 <template>
 	<div class="chat-body">
 		<template v-for="(message, index) in messages">
-			<div id="chat-unread-messages" ref="component" class="text-center" v-if="firstUnreadMessage && message.id === firstUnreadMessage.id && scrollToUnread()">
+			<div id="chat-unread-messages" ref="component" class="text-center" v-if="firstUnreadMessage && message.id === firstUnreadMessage.id">
 				<v-chip
 						outlined
 						small
@@ -93,20 +93,12 @@ export default {
 		}
 	},
 	watch: {
-		// toUnread: function (to) {
-		// 	const vue = this;
-		// 	if(to) setTimeout(function () {
-		// 		console.log('scrollTo')
-		// 		vue.$emit('scrollTo', '#chat-unread-messages')
-		// 	})
-		// },
 		messages: function () {
 			if (!this.setUnreadMessage) {
 				this.setUnreadMessage = true;
 				this.setFirstUnreadMessage()
 				this.$nextTick(function () {
 					if(this.firstUnreadMessage) this.$emit('scrollTo', '#chat-unread-messages')
-					else if(this.lastMessage) this.$emit('scrollTo', '#message-' + this.lastMessage.id)
 				});
 			}
 		},
@@ -125,16 +117,11 @@ export default {
 		return {
 			clearUnreadMessage: null,
 			setUnreadMessage: false,
-			firstUnreadMessage: null,
-			toUnread: false
+			firstUnreadMessage: null
 		}
 	},
 	mounted() {
 		this.setFirstUnreadMessage()
-		// this.$nextTick(function () {
-		// 	console.log('$nextTick')
-		// 	// if(this.lastMessage) this.$emit('scrollTo', '#message-' + this.lastMessage.id)
-		// });
 	},
 	methods: {
 		setFirstUnreadMessage () {
@@ -145,9 +132,6 @@ export default {
 				this.clearUnreadMessage = null;
 			}
 			this.firstUnreadMessage = message ? Object.assign({}, message) : this.firstUnreadMessage
-		},
-		scrollToUnread () {
-			return this.toUnread = true;
 		},
 		readMessage(isVisible, entry, message) {
 			if(isVisible) {

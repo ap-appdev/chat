@@ -9,7 +9,8 @@ const state = {
     selectedChat: null,
     loadingChat: false,
     loadingMessages: false,
-    chatSidebar: false
+    chatSidebar: false,
+    messagesChats: {}
 };
 
 // getters
@@ -34,6 +35,9 @@ const getters = {
     },
     chatSidebar: state => {
         return state.chatSidebar
+    },
+    messagesChats: state => {
+        return state.messagesChats
     }
 }
 
@@ -95,14 +99,23 @@ const actions = {
         commit('loadingChat', false);
     },
     async getMessages({getters, commit, dispatch}) {
-        commit('loadingMessages', true);
+        // commit('loadingMessages', true);
         let chat = await dispatch('getCleanChat', getters.selectedChat);
-        let last = !!getters.selectedChat.messages && getters.selectedChat.messages[0] ? getters.selectedChat.messages[0].id : 0;
-        return api.post("messages", { chat, last }).then(response => {
+        let lastMessage = getters.selectedChat.messages && getters.selectedChat.messages[0] ? getters.selectedChat.messages[0] : null;
+        if(lastMessage) {
+            if(Array.isArray(getters.messagesChats[lastMessage.id_chat])) {
+                let messages = getters.messagesChats[lastMessage.id_chat].slice();
+                commit('clearChatMessages', lastMessage.id_chat);
+                commit('appendChatMessages', messages);
+                return Promise.resolve(messages);
+            }
+        }
+        let lastId = lastMessage ? lastMessage.id : 0;
+        return api.post("messages", { chat, last: lastId }).then(response => {
             commit('appendChatMessages', response.data);
-            return Promise.resolve(response);
+            return Promise.resolve(response.data);
         }).finally(() => {
-            commit('loadingMessages', false);
+            // commit('loadingMessages', false);
         });
     },
     async sendAttachments({commit, dispatch, getters}, payload) {
@@ -183,6 +196,7 @@ const mutations = {
     },
     setChat(state, chat) {
         if(state.selectedChat && Array.isArray(state.selectedChat.messages) && state.selectedChat.messages.length) {
+            state.messagesChats[state.selectedChat.messages[0].id_chat] = state.selectedChat.messages.slice(0, state.selectedChat.messages.length - 1);
             state.selectedChat.messages = [state.selectedChat.messages.pop()];
         }
         if(chat.type === 'user') {
@@ -198,6 +212,9 @@ const mutations = {
     loadingMessages(state, boolean) {
         state.loadingMessages = boolean;
     },
+    clearChatMessages(state, id_chat) {
+        delete state.messagesChats[id_chat]
+    },
     appendChatMessages(state, messages) {
         if (!state.selectedChat) return false;
         // if (!!user.messages)
@@ -205,7 +222,6 @@ const mutations = {
         // else
         //     user.messages = [message];
         // state.selectedChat.messages.unshift(...messages);
-        // const message = messages.find(message => message.unread);
         state.selectedChat.messages = messages.concat(!!state.selectedChat.messages ? state.selectedChat.messages : [])
     },
     newMessage(state, data) {

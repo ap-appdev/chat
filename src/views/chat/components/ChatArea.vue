@@ -195,7 +195,7 @@ import { getCurrentAppLayout, handlingErrors } from "Helpers/helpers";
 
 export default {
 	computed: {
-		...mapGetters(["getUser", "selectedChat", "loadingChat", "loadingMessages"]),
+		...mapGetters(["getUser", "selectedChat", "loadingChat"]),
 		chatBodyHeight: function () {
 			let footerHeight = this.selectedChat.check.write ? +this.footer : 0;
 			let h = footerHeight + 65;
@@ -314,7 +314,7 @@ export default {
 			}
 		},
 		scrollToEnd() {
-			this.scrollTo('#message-' + this.lastMessage.id)
+			if(this.lastMessage) this.scrollTo('#message-' + this.lastMessage.id)
 		},
 		scrollTo (el) {
 			this.$vuetify.goTo(el, {
@@ -340,8 +340,8 @@ export default {
 		},
 		infiniteMessages($state) {
 			setTimeout(() => {
-				this.$store.dispatch("getMessages").then(({ data }) => {
-					if (data.length) {
+				this.$store.dispatch("getMessages").then((messages) => {
+					if (messages.length) {
 						$state.loaded();
 					} else {
 						$state.complete();
