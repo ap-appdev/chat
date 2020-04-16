@@ -11,7 +11,7 @@ const config = require('../config');
 export function getDateTimeMessage(date, format) {
 	let localUTC = moment().utcOffset();
 	let newDate = moment(date).utc().utcOffset(localUTC - config.serverUTC);
-	let defFormat = moment().format('DD.MM.YYYY') === newDate.format('DD.MM.YYYY') ? 'HH:mm' : 'DD.MM.YYYY HH:mm';
+	let defFormat = moment().format('DD.MM.YYYY') === newDate.format('DD.MM.YYYY') ? 'HH:mm' : 'DD.MM.YYYY';
 	return newDate.format(format || defFormat);
 }
 
@@ -79,8 +79,14 @@ export function getCurrentAppLayout(router) {
  * Error handling function
  */
 export function handlingErrors(error) {
-	error = (typeof error.response === 'object') ? error.response.status : error;
-	let messError = vue.$t('message.errors.' + error) !== 'message.errors.' + error ? vue.$t('message.errors.' + error) : vue.$t('message.errors.default');
+	let errorText, errorStatus;
+	if(typeof error.response === 'object') {
+		errorText = error.response.data.message;
+		errorStatus = error.response.status;
+	}
+	let messError = vue.$te('message.errors.' + errorText) ? vue.$t('message.errors.' + errorText) :
+		vue.$te('message.errors.' + errorStatus) ? vue.$t('message.errors.' + errorStatus) :
+			vue.$t('message.errors.default');
 	Vue.notify({
 		group: 'auth',
 		type: 'error',
@@ -99,7 +105,7 @@ export function getHrefFileType(name) {
 	name = name.split('.')
 	let type = name[name.length-1];
 	// let typefile = config.fileTypes.indexOf(type) !== -1 ? type : 'default';
-	return `/static/img/file-types/1/${type.toUpperCase()}.png`;
+	return `${process.env.BASE_URL}static/img/file-types/1/${type.toUpperCase()}.png`;
 }
 
 export function getPreviewTextChat(message) {

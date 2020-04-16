@@ -35,7 +35,7 @@ if (!!token) {
 // Socket
 import VueSocketIO from 'vue-socket.io'
 Vue.use(new VueSocketIO({
-	debug: true,
+	debug: false,
 	connection: config.io.connection,
 	vuex: {
 		store,

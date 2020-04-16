@@ -79,7 +79,6 @@
 						vue = this;
 
 					this.$store.dispatch("login", {user}).then(function () {
-						console.log('login')
 						let redirect = !!vue.$route.query.redirect ? vue.$route.query.redirect : '/';
 						vue.$router.replace(redirect);
 					});

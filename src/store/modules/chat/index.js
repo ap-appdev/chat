@@ -7,7 +7,6 @@ const state = {
     offlineUsers: localStorage.getItem('offline-users') || false,
     loadingChatModule: false,
     selectedChat: null,
-    firstIdUnreadMessage: null,
     loadingChat: false,
     loadingMessages: false,
     chatSidebar: false
@@ -26,11 +25,6 @@ const getters = {
     },
     selectedChat: state => {
         return state.selectedChat
-    },
-    firstIdUnreadMessage: state => {
-        // const message = state.selectedChat.messages ? state.selectedChat.messages.find(message => message.unread) : null;
-        // return message ? message.id : null;
-        return state.firstIdUnreadMessage
     },
     loadingChat: state => {
         return state.loadingChat
@@ -84,7 +78,8 @@ const actions = {
             let roleUser = skillGroup.roles.find(role => role.id === chat.role_id),
                 authRolesWrite = !!roleAuthUser.roles_write ? roleAuthUser.roles_write.split(',') : [],
                 rolesWrite = !!roleUser.roles_write ? roleUser.roles_write.split(',') : [],
-                write = authUser.role_id === chat.role_id ? !!roleUser.role_write : (rolesWrite.indexOf(roleAuthUser.id.toString()) !== -1 || authRolesWrite.indexOf(roleUser.id.toString()) !== -1);
+                // write = authUser.role_id === chat.role_id ? !!roleUser.role_write : (rolesWrite.indexOf(roleAuthUser.id.toString()) !== -1 || authRolesWrite.indexOf(roleUser.id.toString()) !== -1);
+                write = rolesWrite.indexOf(roleAuthUser.id.toString()) !== -1 || authRolesWrite.indexOf(roleUser.id.toString()) !== -1;
             check.view = write;
             check.write = write;
         } else return false;
@@ -210,8 +205,7 @@ const mutations = {
         // else
         //     user.messages = [message];
         // state.selectedChat.messages.unshift(...messages);
-        const message = messages.find(message => message.unread);
-        state.firstIdUnreadMessage = message ? message.id : state.firstIdUnreadMessage;
+        // const message = messages.find(message => message.unread);
         state.selectedChat.messages = messages.concat(!!state.selectedChat.messages ? state.selectedChat.messages : [])
     },
     newMessage(state, data) {

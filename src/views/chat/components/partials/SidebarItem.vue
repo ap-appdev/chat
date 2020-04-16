@@ -15,19 +15,34 @@
 			</v-avatar>
 		</template>
 		<v-list-item-content class="py-0">
-			<v-list-item-title class="mb-1 fw-semi-bold fs-14 d-flex">
-				{{item.type === 'group' ? $t('message.generalChat') + ' ' + item.name : item.fio}}
+			<v-list-item-title class="mb-1 fw-semi-bold fs-14 d-flex align-baseline">
+<!--				{{item.type === 'group' ? $t('message.generalChat') + ' ' + item.name : item.fio}}-->
+<!--				<v-spacer></v-spacer>-->
+<!--				<v-chip v-if="!!item.unread_count" x-small class="primary ml-2 font-weight-regular">{{item.unread_count}}</v-chip>-->
+
+				<span class="text-ellipse">{{item.type === 'group' ? $t('message.generalChat') + ' ' + item.name : item.fio}}</span>
 				<v-spacer></v-spacer>
-				<v-chip v-if="!!item.unread_count" x-small class="primary ml-2 font-weight-regular">{{item.unread_count}}</v-chip>
+				<span v-if="!role && !!item.messages && item.messages.length" class="ml-1 text-nowrap fs-12" :class="item.messages[item.messages.length - 1].unread ? 'primary--text fw-semi-bold' : 'grey--text fw-normal gray-light-color'">
+					{{getDateTimeMessage(item.messages[item.messages.length - 1].date)}}
+				</span>
 			</v-list-item-title>
 			<v-list-item-subtitle v-if="!!role && !!item.role_name" class="fs-12 fw-normal grey--text">{{item.role_name}}</v-list-item-subtitle>
-			<template v-if="!role && !!item.messages && item.messages.length > 0">
-				<v-list-item-subtitle class="fs-12 fw-normal">{{getPreviewTextChat(item.messages[item.messages.length - 1])}}</v-list-item-subtitle>
-				<v-list-item-subtitle class="fs-12 d-flex align-center" :class="item.messages[item.messages.length - 1].unread ? 'primary--text fw-semi-bold' : 'grey--text fw-normal'">
+			<template v-if="!role && !!item.messages && item.messages.length">
+<!--				<v-list-item-subtitle class="fs-12 fw-normal text-ellipse">{{getPreviewTextChat(item.messages[item.messages.length - 1])}}</v-list-item-subtitle>-->
+<!--				<v-list-item-subtitle class="fs-12 d-flex align-center" :class="item.messages[item.messages.length - 1].unread ? 'primary&#45;&#45;text fw-semi-bold' : 'grey&#45;&#45;text fw-normal'">-->
+<!--					<v-spacer></v-spacer>-->
+<!--					<v-icon v-if="getUser && getUser.agent_id === item.messages[item.messages.length - 1].id_sender" small class="mr-1" :color="!item.messages[item.messages.length - 1].notread_count ? 'success' : 'grey lighten-1'">mdi-check-all</v-icon>-->
+<!--					{{getDateTimeMessage(item.messages[item.messages.length - 1].date)}}-->
+<!--				</v-list-item-subtitle>-->
+
+				<v-list-item-subtitle class="d-flex fs-12 fw-normal text-ellipse">
+					<span class="text-ellipse">
+						<v-icon v-if="getUser && getUser.agent_id === item.messages[item.messages.length - 1].id_sender" style="vertical-align: text-bottom" small :color="!item.messages[item.messages.length - 1].notread_count ? 'success' : 'grey lighten-1'">mdi-check-all</v-icon>
+						{{getPreviewTextChat(item.messages[item.messages.length - 1])}}
+					</span>
 					<v-spacer></v-spacer>
-					<v-icon v-if="getUser && getUser.agent_id === item.messages[item.messages.length - 1].id_sender" small class="mr-1" :color="!item.messages[item.messages.length - 1].notread_count ? 'success' : 'grey lighten-1'">mdi-check-all</v-icon>
-					{{getDateTimeMessage(item.messages[item.messages.length - 1].date)}}
-					</v-list-item-subtitle>
+					<span v-if="!!item.unread_count"><v-chip x-small class="primary ml-1">{{item.unread_count}}</v-chip></span>
+				</v-list-item-subtitle>
 			</template>
 		</v-list-item-content>
 <!--		<v-list-item-action class="my-0">-->

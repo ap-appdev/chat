@@ -1,4 +1,7 @@
 /*========== Custome Variable ==========*/
+$baseUrl: '/chat'; // for prod
+//$baseUrl: '';
+
 // App Global Font Size
 $html-font-size:              16px;
 
@@ -38,7 +41,7 @@ $theme-colors: map-merge((
 ), $theme-colors);
 
 // Settings for the `<body>` element.
-$body-bg-image:                 url('/static/img/bg-login.png') center no-repeat fixed;
+$body-bg-image:                 url($baseUrl + '/static/img/bg-login.png') center no-repeat fixed;
 $body-bg:                       $base;
 $body-color:                    $gray-dark;
 $font-family-base:              'Montserrat', sans-serif;
@@ -196,4 +199,4 @@ $hoz-sub-menu-box-shadow:      0 2px 15px 0 rgba(0,0,0,0.09);
 $aqua-bg:                         #DFEAFF;
 
 //weather bg
-$weather-bg:                      url('/static/img/weather-1.jpg');
+$weather-bg:                      url($baseUrl + '/static/img/weather-1.jpg');

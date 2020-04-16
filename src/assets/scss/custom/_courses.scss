@@ -1,6 +1,6 @@
 /*========== Courses Css =========*/
 .courses-bg-img{
-   background-image:url("/static/img/acad-banner.jpg");
+   background-image:url($baseUrl + "/static/img/acad-banner.jpg");
    background-size: cover;
    background-position:center;
 }
@@ -578,7 +578,7 @@ iframe {
 		}
 	}
 	.popularity.tab-wrap .course-card :nth-child(4n)
-	.course-item-wrap .course-hover-item,{
+	.course-item-wrap .course-hover-item {
 		right: auto;
 		left: calc(100% - 15px);
 		&:after,&:before{
@@ -589,7 +589,7 @@ iframe {
 		}
 	}
 	.popularity.tab-wrap .course-card :nth-child(3n)
-	.course-item-wrap .course-hover-item,{
+	.course-item-wrap .course-hover-item {
 		left: auto;
 		right: calc(100% - 15px);
 		&:after,&:before{

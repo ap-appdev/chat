@@ -72,7 +72,8 @@
 						opacity: 0,
 						height: 0
 					}
-				}
+				},
+				baseUrl: process.env.BASE_URL
 			};
 		},
 		created: function () {
@@ -88,20 +89,20 @@
 			});
 		},
 		sockets : {
-			connect: function(){
+			connect: function() {
 				this.$socket.emit('authenticate', {token: this.token});
 				console.log('socket connected');
 			},
-			disconnect: function(reason){
+			disconnect: function(reason) {
 				if(reason === 'io server disconnect') {
 					this.$socket.connect();
 				}
 				console.log('socket disconnect');
 			},
-			authenticated: function(){
+			authenticated: function() {
 				console.log('socket authenticated');
 			},
-			unauthorized: function(error){
+			unauthorized: function(error) {
 				if (error.data.type === "UnauthorizedError" || error.data.code === "invalid_token") {
 					this.$store.dispatch("logout", true);
 					console.log("User's token has expired");
@@ -118,7 +119,7 @@
 				let vue = this;
 				if(!!props) this.$notification.show(props.item.title + ' ' + props.item.data.title, {
 					body: getPreviewTextChat(props.item.data.message) + '\n' + getDateTimeMessage(props.item.data.message.date),
-					icon:   '/static/img/notification.png'
+					icon:   this.baseUrl + 'static/img/notification.png'
 				}, {
 					onclick: function () {
 						window.focus();

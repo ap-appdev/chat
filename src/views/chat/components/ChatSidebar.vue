@@ -22,22 +22,24 @@
 		<v-list>
 			<vue-perfect-scrollbar class="chat-sidebar-scroll" :style="getScrollHeight()" :settings="settings">
 				<template v-for="(item, index) in foundChats">
-					<sidebar-item :key="index" :item="item" role></sidebar-item>
+					<sidebar-item :key="'found-'+index" :item="item" role></sidebar-item>
 				</template>
-				<v-list-group
-						v-if="newMessages.count > 0"
-						prepend-icon="message"
-				>
-					<template v-slot:activator>
-						<v-list-item-title>{{$t('message.newMessages')}}</v-list-item-title>
-						<v-list-item-icon class="d-table">
-							<v-chip small class="primary">{{newMessages.count}}</v-chip>
-						</v-list-item-icon>
-					</template>
-					<template v-for="(item, index) in newMessages.chats">
-						<sidebar-item :key="index" :item="item"></sidebar-item>
-					</template>
-				</v-list-group>
+
+<!--				<v-list-group-->
+<!--						v-if="newMessages.count > 0"-->
+<!--						prepend-icon="message"-->
+<!--				>-->
+<!--					<template v-slot:activator>-->
+<!--						<v-list-item-title>{{$t('message.newMessages')}}</v-list-item-title>-->
+<!--						<v-list-item-icon class="d-table">-->
+<!--							<v-chip small class="primary">{{newMessages.count}}</v-chip>-->
+<!--						</v-list-item-icon>-->
+<!--					</template>-->
+<!--					<template v-for="(item, index) in newMessages.chats">-->
+<!--						<sidebar-item :key="index" :item="item"></sidebar-item>-->
+<!--					</template>-->
+<!--				</v-list-group>-->
+
 				<v-list-group
 						prepend-icon="group"
 						v-for="group in skillGroups"
@@ -57,6 +59,12 @@
 							:offlineUsers="offlineUsers">
 					</sidebar-role-users>
 				</v-list-group>
+
+				<v-subheader v-if="recentChats && recentChats.length">{{ $t('message.recentChats') }}</v-subheader>
+				<template v-for="(item, index) in recentChats">
+					<sidebar-item :key="'last-'+index" :item="item"></sidebar-item>
+				</template>
+
 			</vue-perfect-scrollbar>
 		</v-list>
 	</v-card>
@@ -101,24 +109,39 @@
 					return (aName.toLowerCase() > bName.toLowerCase()) ? 1 : -1;
 				});
 			},
-			newMessages() {
+			// newMessages() {
+			// 	if(!this.skillGroups) return {count: 0, chats: []};
+			// 	let chats = this.skillGroups.filter(group => !!group.unread_count);
+			// 	this.skillGroups.forEach(function (group) {
+			// 		let users = group.users.filter(user => !!user.unread_count);
+			// 		users.forEach(user => {
+			// 			if(chats.findIndex(item => item.agent_id === user.agent_id) === -1) chats.push(user);
+			// 		});
+			// 	});
+			// 	chats.sort((a, b) => {
+			// 		let aDate = a.messages[a.messages.length - 1].date;
+			// 		let bDate = b.messages[b.messages.length - 1].date;
+			// 		return (convertDateToTimeStamp(aDate, 'YYYY-MM-DDTHH:mm:ss.SSS') < convertDateToTimeStamp(bDate, 'YYYY-MM-DDTHH:mm:ss.SSS')) ? 1 : -1;
+			// 	});
+			// 	let count = chats.reduce(function(count, chat) {
+			// 		return count + +chat.unread_count;
+			// 	}, 0);
+			// 	return {count, chats};
+			// },
+			recentChats() {
 				if(!this.skillGroups) return {count: 0, chats: []};
-				let chats = this.skillGroups.filter(group => !!group.unread_count);
+				let chats = this.skillGroups.filter(group => !!group.messages && group.messages.length > 0);
 				this.skillGroups.forEach(function (group) {
-					let users = group.users.filter(user => !!user.unread_count);
+					let users = group.users.filter(user => !!user.messages && user.messages.length > 0);
 					users.forEach(user => {
 						if(chats.findIndex(item => item.agent_id === user.agent_id) === -1) chats.push(user);
 					});
 				});
-				chats.sort((a, b) => {
+				return chats.sort((a, b) => {
 					let aDate = a.messages[a.messages.length - 1].date;
 					let bDate = b.messages[b.messages.length - 1].date;
 					return (convertDateToTimeStamp(aDate, 'YYYY-MM-DDTHH:mm:ss.SSS') < convertDateToTimeStamp(bDate, 'YYYY-MM-DDTHH:mm:ss.SSS')) ? 1 : -1;
 				});
-				let count = chats.reduce(function(count, chat) {
-					return count + +chat.unread_count;
-				}, 0);
-				return {count, chats};
 			}
 		},
 		data() {

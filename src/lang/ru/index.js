@@ -3,7 +3,10 @@ export default {
    errors: {
       default: 'Упс, что то пошло не так',
       403: 'У вас не достаточно прав',
-      LIMIT_FILE_SIZE: 'Превышен размер загружаемого файла'
+      LIMIT_FILE_SIZE: 'Превышен размер загружаемого файла',
+      LoginRequired: 'Необходимо ввести логин',
+      PasswordRequired: 'Необходимо ввести пароль',
+      LoginOrPasswordIsInvalid: 'Неверный логин или пароль'
    },
    appName: 'Чат InGrape',
    enterUsernameAndPassword: 'Введите ваш логин и пароль для входа в чат',
@@ -41,6 +44,7 @@ export default {
    openChat: 'Открыть чат',
    showAttachments: 'Показать все вложения',
    previousChats: 'Предыдущие чаты',
+   recentChats: 'Недавние чаты',
    offlineUsersChat: 'Показать офлайн контакты',
    attachFile: 'Прикрепить файл',
    selectFilesChat: 'Выберите файлы, которые хотите отправить',

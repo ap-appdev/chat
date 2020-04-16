@@ -75,7 +75,7 @@
 							<div slot="no-more"></div>
 							<div slot="no-results"></div>
 						</infinite-loading>
-						<chat-area-body v-scroll:#scroll-area-body="onScroll" :messages="selectedChat.messages" :height="chatBodyHeight" @scrollTo="scrollTo"></chat-area-body>
+						<chat-area-body v-scroll:#scroll-area-body="onScroll" :type="selectedChat.type" :messages="selectedChat.messages" :unread_count="selectedChat.unread_count" :height="chatBodyHeight" @scrollTo="scrollTo"></chat-area-body>
 					</vue-perfect-scrollbar>
 					<transition name="fade">
 						<v-btn v-show="showScrollToEnd" fab small class="v-btn--absolute v-btn--right" style="bottom: 16px" @click.stop="scrollToEnd">
@@ -195,7 +195,7 @@ import { getCurrentAppLayout, handlingErrors } from "Helpers/helpers";
 
 export default {
 	computed: {
-		...mapGetters(["selectedLocale", "getUser", "selectedChat", "loadingChat", "loadingMessages"]),
+		...mapGetters(["getUser", "selectedChat", "loadingChat", "loadingMessages"]),
 		chatBodyHeight: function () {
 			let footerHeight = this.selectedChat.check.write ? +this.footer : 0;
 			let h = footerHeight + 65;
@@ -215,6 +215,7 @@ export default {
 	},
 	data() {
 		return {
+			infiniteLoad: false,
 			valid: false,
 			filesRules: [v => !!v || this.$t('message.requiredFiles')],
 			settings: {
@@ -246,6 +247,7 @@ export default {
 			handler: function (after, before) {
 				if(after !== before) {
 					this.newMessage = '';
+					this.showDate = '';
 				}
 			}
 		},
@@ -318,7 +320,7 @@ export default {
 			this.$vuetify.goTo(el, {
 				duration: 300,
 				container: '.chat-area-scroll',
-				offset: 15
+				offset: 115
 			})
 		},
 		onScroll (e) {

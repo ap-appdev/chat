@@ -5,21 +5,20 @@
         <v-flex xs12 sm8 md4 mx-auto>
           <div class="mb-70">
             <router-link to="/" class="d-block text-center">
-              <img src="/static/img/session.png" class="img-responsive mb-4" width="78" height="78" />
+              <img src="<%= BASE_URL %>static/img/session.png" class="img-responsive mb-4" width="78" height="78" />
             </router-link>
-            </p>
           </div>
           <div class="lock-screen-block text-center">
             <div class="s-user mb-6">
-              <img class="rounded-circle img-responsive" src="/static/avatars/user-9.jpg" width="143" height="143">
+              <img class="rounded-circle img-responsive" src="<%= BASE_URL %>static/avatars/user-9.jpg" width="143" height="143">
             </div>
             <h2 class="white--text">Jerry Cummings</h2>
             <v-form v-model="valid" class="mb-6">
-              <v-text-field 
-                label="Password" 
-                v-model="password" 
-                :rules="passwordRules" 
-                type="password" 
+              <v-text-field
+                label="Password"
+                v-model="password"
+                :rules="passwordRules"
+                type="password"
                 color="white"
                 required>
               </v-text-field>

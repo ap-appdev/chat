@@ -206,7 +206,7 @@
          }
          .app-content{
             overflow-x:hidden;
-            background-color: $base; 
+            background-color: $base;
          }
       }
    }
@@ -334,7 +334,7 @@
    }
    &.boxed-v2{
       overflow:hidden;
-      background-image: url(/static/img/bg-1.jpg);
+      background-image: url($baseUrl + '/static/img/bg-1.jpg');
       background-size: cover !important;
       background-position: center center !important;
 		background-repeat: no-repeat !important;

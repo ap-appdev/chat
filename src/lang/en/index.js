@@ -3,7 +3,10 @@ export default {
   errors: {
     default: 'Oops, something went wrong',
     403: 'You do not have enough rights',
-    LIMIT_FILE_SIZE: 'File size exceeded'
+    LIMIT_FILE_SIZE: 'File size exceeded',
+    LoginRequired: 'Login is required',
+    PasswordRequired: 'Password is required',
+    LoginOrPasswordIsInvalid: 'Login or password is invalid'
   },
   appName: 'Chat InGrape',
   enterUsernameAndPassword: 'Enter your login and password to enter the chat',
@@ -41,6 +44,7 @@ export default {
   openChat: 'Open chat',
   showAttachments: 'Show all attachments',
   previousChats: 'Previous chats',
+  recentChats: 'Recent chats',
   offlineUsersChat: 'Show offline contacts',
   attachFile: 'Attach file',
   selectFilesChat: 'Select the files you want to send',

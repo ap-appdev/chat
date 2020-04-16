@@ -1,7 +1,7 @@
 <template>
 	<div class="chat-body">
 		<template v-for="(message, index) in messages">
-			<div id="chat-unread-messages" ref="component" class="text-center pt-8" v-if="message.id === firstIdUnreadMessage && scrollToUnread()">
+			<div id="chat-unread-messages" ref="component" class="text-center" v-if="firstUnreadMessage && message.id === firstUnreadMessage.id && scrollToUnread()">
 				<v-chip
 						outlined
 						small
@@ -30,21 +30,19 @@
 							<span small class="white--text">{{message.fio_sender.charAt(0)}}</span>
 						</v-avatar>
 					</template>
-					<div class="chat-bubble-wrap"
-						v-observe-visibility="message.unread ?
-							{
-								callback: (isVisible, entry) => readMessage(isVisible, entry, message),
-								throttle: 300,
-								once: true
-							}
-							: false"
-					>
+					<div class="chat-bubble-wrap">
 						<div class="chat-bubble even aqua-bg px-4 d-block align-items-center flex-column">
-							<h6 class="mb-1 d-block">{{message.fio_sender}}</h6>
+							<h6 class="mb-1 d-block" v-if="type === 'group'">{{message.fio_sender}}</h6>
 							<span class="d-block fs-14">{{message.message}}</span>
 							<chat-area-body-files :files="message.files"></chat-area-body-files>
 						</div>
-						<span class="fs-12 text-left d-block mt-1" :class="message.unread ? 'primary--text fw-semi-bold' : 'grey--text fw-normal'">{{getDateMessage(message.date)}}</span>
+						<span class="fs-12 text-left d-block mt-1" :class="message.unread ? 'primary--text fw-semi-bold' : 'grey--text fw-normal'"
+						      v-observe-visibility="message.unread ? {
+										callback: (isVisible, entry) => readMessage(isVisible, entry, message),
+										throttle: 300,
+										once: true
+									} : false"
+						>{{getDateMessage(message.date)}}</span>
 					</div>
 				</template>
 				<template v-else>
@@ -63,7 +61,7 @@
 						</div>
 						<span class="fs-12 grey--text text-right d-block mt-1 fw-normal">
 							{{getDateMessage(message.date)}}
-							<v-icon small class="ml-1" style="vertical-align: bottom" :color="!message.notread_count ? 'success' : 'grey lighten-1'">mdi-check-all</v-icon>
+							<v-icon small class="ml-1" style="vertical-align: text-bottom" :color="!message.notread_count ? 'success' : 'grey lighten-1'">mdi-check-all</v-icon>
 					</span>
 					</div>
 				</template>
@@ -87,24 +85,67 @@ export default {
 	components: {
 		ChatAreaBodyFiles
 	},
-	props: ["messages", "height"],
+	props: ["type", "messages", "unread_count", "height"],
 	computed: {
-		...mapGetters(["getUser", "firstIdUnreadMessage"]),
+		...mapGetters(["getUser"]),
+		lastMessage: function () {
+			return this.messages && this.messages.length ? this.messages[this.messages.length - 1] : null
+		}
 	},
 	watch: {
-		toUnread: function (to) {
-			const vue = this;
-			if(to) setTimeout(function () {
-				vue.$emit('scrollTo', '#chat-unread-messages')
-			})
+		// toUnread: function (to) {
+		// 	const vue = this;
+		// 	if(to) setTimeout(function () {
+		// 		console.log('scrollTo')
+		// 		vue.$emit('scrollTo', '#chat-unread-messages')
+		// 	})
+		// },
+		messages: function () {
+			if (!this.setUnreadMessage) {
+				this.setUnreadMessage = true;
+				this.setFirstUnreadMessage()
+				this.$nextTick(function () {
+					if(this.firstUnreadMessage) this.$emit('scrollTo', '#chat-unread-messages')
+					else if(this.lastMessage) this.$emit('scrollTo', '#message-' + this.lastMessage.id)
+				});
+			}
+		},
+		unread_count: function (to) {
+			let vue = this;
+			if (to === 0) {
+				if(this.clearUnreadMessage) clearTimeout(this.clearUnreadMessage);
+				this.clearUnreadMessage = setTimeout(function () {
+					vue.firstUnreadMessage = null
+				}, 10000);
+			}
+			if (to >= 3) this.setFirstUnreadMessage()
 		}
 	},
 	data () {
 		return {
+			clearUnreadMessage: null,
+			setUnreadMessage: false,
+			firstUnreadMessage: null,
 			toUnread: false
 		}
 	},
+	mounted() {
+		this.setFirstUnreadMessage()
+		// this.$nextTick(function () {
+		// 	console.log('$nextTick')
+		// 	// if(this.lastMessage) this.$emit('scrollTo', '#message-' + this.lastMessage.id)
+		// });
+	},
 	methods: {
+		setFirstUnreadMessage () {
+			if(!this.messages) return false;
+			let message = this.messages.find(message => message.unread);
+			if(message && this.clearUnreadMessage) {
+				clearTimeout(this.clearUnreadMessage);
+				this.clearUnreadMessage = null;
+			}
+			this.firstUnreadMessage = message ? Object.assign({}, message) : this.firstUnreadMessage
+		},
 		scrollToUnread () {
 			return this.toUnread = true;
 		},

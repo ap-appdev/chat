@@ -25,7 +25,7 @@
 		}
       .chat-wrapper {
          .chat-area-scroll {
-            //background-image: url("/static/img/bg-ingrape.png");
+            //background-image: url($baseUrl + "/static/img/bg-ingrape.png");
             //background-repeat: repeat;
          }
       }
@@ -103,7 +103,13 @@
             .v-list-item__subtitle {
                color: $light !important;
             }
+            .gray-light-color {
+               color: $gray-light !important;
+            }
          }
+      }
+      .v-list-group__items {
+         width: 100% !important;
       }
    }
 }

@@ -145,7 +145,7 @@
 
 .app-event-calendar {
    .event-tab-wrapper {
-      background: url(/static/img/blog-6.jpg) no-repeat center center;
+      background: url($baseUrl + '/static/img/blog-6.jpg') no-repeat center center;
       background-size: cover;
       .event-heading-wrap {
          opacity: 0.925;
@@ -431,7 +431,7 @@
 /*================== Blog Layout Four =================*/
 
 .blog-four-layout {
-   background: url(/static/img/post-2.png) no-repeat center center;
+   background: url($baseUrl + '/static/img/post-2.png') no-repeat center center;
    background-size: cover;
    overflow: hidden;
 }
@@ -628,7 +628,7 @@
 			padding: 0 1.5rem;
 			.v-list-item__content *{
 				line-height: 1.5;
-			}		
+			}
          .v-list-item__content i{
 				color: $gray-light;
 				font-size: 12px;
@@ -893,12 +893,12 @@
          .v-list-item__avatar {
             justify-content: flex-start;
 				margin: 0 !important;
-				min-width:56px !important; 
+				min-width:56px !important;
 			}
 			.v-list-item__content{
 				padding: 0;
 				p,h6{
-					line-height: 1.5;	
+					line-height: 1.5;
 				}
 			}
 			.v-list-item__action{
@@ -928,7 +928,7 @@
                justify-content: flex-start !important;
             }
          }
-         
+
          &:hover {
             .v-list-item__action {
               opacity:1;
@@ -1156,7 +1156,7 @@
 
 /*================== Trending News Widget ===================*/
 .trending-news-widegt {
-   background-image: url(/static/img/profile-bg.jpg);
+   background-image: url($baseUrl + '/static/img/profile-bg.jpg');
    background-size: cover;
    background-position: center center;
    background-repeat: no-repeat;
@@ -1454,7 +1454,7 @@
 
 .user-profile-widget{
    .avatar-wrap{
-      background: url(/static/img/blog-6.jpg) no-repeat center center;
+      background: url($baseUrl + '/static/img/blog-6.jpg') no-repeat center center;
       background-size: cover;
       z-index:0;
       padding:4.5rem;

@@ -28,11 +28,11 @@ const actions = {
         return new Promise((resolve, reject) => {
             api.post("login", user).then(response => {
                 let { data: {user, token} } = response;
-                console.log(user, token);
-                commit('loginUserSuccess', { user, token });
-                resolve(user)
+                setTimeout(function () {
+                    commit('loginUserSuccess', {user, token});
+                    resolve(user)
+                }, 1000);
             }).catch(error => {
-                console.log(error.response)
                 commit('loginUserFailure', error);
                 reject()
             });
@@ -44,7 +44,6 @@ const actions = {
         if(!!unauth) return commit('logoutUser');
         return new Promise((resolve, reject) => {
             api.post("logout").then(response => {
-                console.log(response);
                 resolve(response)
             }).catch(handlingErrors).finally(() => {
                 commit('logoutUser');
