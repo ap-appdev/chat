@@ -66,6 +66,14 @@
            }
 			.chat-bubble > span {
                white-space: pre-line;
+               a:hover {
+                  text-decoration: underline !important;
+               }
+			}
+			.chat-bubble.primary > span {
+               a {
+                  color: $aqua-bg;
+               }
 			}
 			.chat-attachments * {
                color: #464D69 !important;
