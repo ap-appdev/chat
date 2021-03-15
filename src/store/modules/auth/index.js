@@ -28,6 +28,7 @@ const actions = {
         return new Promise((resolve, reject) => {
             api.post("login", user).then(response => {
                 let { data: {user, token} } = response;
+                setAuth({user, token});
                 setTimeout(function () {
                     commit('loginUserSuccess', {user, token});
                     resolve(user)
@@ -35,6 +36,8 @@ const actions = {
             }).catch(error => {
                 commit('loginUserFailure', error);
                 reject()
+            }).finally(() => {
+                Nprogress.done();
             });
         });
     },
@@ -54,13 +57,10 @@ const actions = {
 
 const mutations = {
     loginUserSuccess(state, resp) {
-        Nprogress.done();
         state.user = resp.user;
         state.token = resp.token;
-        setAuth(resp);
     },
     loginUserFailure(state, error) {
-        Nprogress.done();
         state.user = null;
         state.token = null;
         setAuth();

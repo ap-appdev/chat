@@ -33,13 +33,13 @@
 					<div class="chat-bubble-wrap">
 						<div class="chat-bubble even aqua-bg px-4 d-block align-items-center flex-column">
 							<h6 class="mb-1 d-block" v-if="type === 'group'">{{message.fio_sender}}</h6>
-							<span class="d-block fs-14">{{message.message}}</span>
+							<chat-message class="d-block fs-14 overflow-hidden" :message="message.message"></chat-message>
 							<chat-area-body-files :files="message.files"></chat-area-body-files>
 						</div>
 						<span class="fs-12 text-left d-block mt-1" :class="message.unread ? 'primary--text fw-semi-bold' : 'grey--text fw-normal'"
 						      v-observe-visibility="message.unread ? {
 										callback: (isVisible, entry) => readMessage(isVisible, entry, message),
-										throttle: 300,
+										throttle: 100,
 										once: true
 									} : false"
 						>{{getDateMessage(message.date)}}</span>
@@ -55,8 +55,8 @@
 						</v-avatar>
 					</template>
 					<div class="chat-bubble-wrap">
-						<div class="chat-bubble odd primary px-4 d-custom-flex align-items-center flex-column">
-							<span class="d-inline-block fs-14 white--text">{{message.message}}</span>
+						<div class="chat-bubble odd primary px-4 d-block align-items-center flex-column">
+							<chat-message class="d-block fs-14 overflow-hidden white--text" :message="message.message"></chat-message>
 							<chat-area-body-files :files="message.files"></chat-area-body-files>
 						</div>
 						<span class="fs-12 grey--text text-right d-block mt-1 fw-normal">
@@ -80,10 +80,12 @@
 import { mapGetters } from "vuex";
 import { getDateTimeMessage, getDateLocalUTC } from "Helpers/helpers";
 import ChatAreaBodyFiles from "./ChatAreaBodyFiles";
+import ChatMessage from "./partials/ChatMessage.js";
 
 export default {
 	components: {
-		ChatAreaBodyFiles
+		ChatAreaBodyFiles,
+		ChatMessage
 	},
 	props: ["type", "messages", "unread_count", "height"],
 	computed: {
@@ -102,15 +104,15 @@ export default {
 				});
 			}
 		},
-		unread_count: function (to) {
+		unread_count: function (after, to) {
 			let vue = this;
-			if (to === 0) {
+			if (after === 0) {
 				if(this.clearUnreadMessage) clearTimeout(this.clearUnreadMessage);
 				this.clearUnreadMessage = setTimeout(function () {
 					vue.firstUnreadMessage = null
 				}, 10000);
 			}
-			if (to >= 3) this.setFirstUnreadMessage()
+			if (after > to && after >= 3) this.setFirstUnreadMessage()
 		}
 	},
 	data () {
@@ -127,6 +129,7 @@ export default {
 		setFirstUnreadMessage () {
 			if(!this.messages) return false;
 			let message = this.messages.find(message => message.unread);
+			if(message && this.firstUnreadMessage && message.id > this.firstUnreadMessage.id) return false;
 			if(message && this.clearUnreadMessage) {
 				clearTimeout(this.clearUnreadMessage);
 				this.clearUnreadMessage = null;

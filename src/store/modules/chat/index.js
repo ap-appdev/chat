@@ -95,25 +95,35 @@ const actions = {
         let check =  await dispatch('checkChat', payload);
         if(!check.view) return Promise.reject(403);
         payload.check = check;
+        console.log(payload)
         commit('setChat', payload);
         commit('loadingChat', false);
     },
-    async getMessages({getters, commit, dispatch}) {
+    async getMessages({getters, commit, dispatch}, options) {
         // commit('loadingMessages', true);
+        const reverse = options ? !! options.reverse : false
+        const reload = options ? !! options.reload : false
         let chat = await dispatch('getCleanChat', getters.selectedChat);
-        let lastMessage = getters.selectedChat.messages && getters.selectedChat.messages[0] ? getters.selectedChat.messages[0] : null;
-        if(lastMessage) {
+        let lastMessage = !reload && Array.isArray(getters.selectedChat.messages) && getters.selectedChat.messages.length > 1 ? getters.selectedChat.messages[reverse ? (getters.selectedChat.messages.length - 1) : 0] : null;
+        if(lastMessage && !reverse) {
             if(Array.isArray(getters.messagesChats[lastMessage.id_chat])) {
                 let messages = getters.messagesChats[lastMessage.id_chat].slice();
                 commit('clearChatMessages', lastMessage.id_chat);
-                commit('appendChatMessages', messages);
+                commit('appendChatMessages', {
+                    messages: messages,
+                    reverse: false
+                });
                 return Promise.resolve(messages);
             }
         }
         let lastId = lastMessage ? lastMessage.id : 0;
-        return api.post("messages", { chat, last: lastId }).then(response => {
-            commit('appendChatMessages', response.data);
-            return Promise.resolve(response.data);
+        return api.post("messages", { chat, last: lastId, reverse }).then(response => {
+            commit('appendChatMessages', {
+                messages: response.data,
+                reverse
+            });
+            const messages = response.data.filter(item => item.id !== lastId)
+            return Promise.resolve(messages);
         }).finally(() => {
             // commit('loadingMessages', false);
         });
@@ -143,6 +153,15 @@ const actions = {
             message: payload
         };
         return api.post("messages/add", message);
+    },
+    async readMessages({commit, dispatch, getters}) {
+        let chat = getters.selectedChat;
+        let check =  await dispatch('checkChat', chat);
+        if(!check.view) return Promise.reject(403);
+        chat = await dispatch('getCleanChat', getters.selectedChat);
+        return api.post("messages/read", chat).then(response => {
+            commit('readMessages');
+        });
     },
     toggleChatSidebar(context, payload) {
         context.commit('toggleChatSidebarHandler', payload);
@@ -215,14 +234,29 @@ const mutations = {
     clearChatMessages(state, id_chat) {
         delete state.messagesChats[id_chat]
     },
-    appendChatMessages(state, messages) {
-        if (!state.selectedChat) return false;
+    appendChatMessages(state, data) {
+        if (!state.selectedChat || !data.messages.length) return false;
+        if(data.reverse) {
+            console.log(data.messages[0])
+            const fMessage = data.messages.splice(0, 1)[0]
+            const lMessage = Array.isArray(state.selectedChat.messages) && state.selectedChat.messages.length ? state.selectedChat.messages[state.selectedChat.messages.length - 1] : null
+            console.log(lMessage, fMessage)
+            if(!lMessage || fMessage.id !== lMessage.id) state.selectedChat.messages = data.messages
+            else {
+                state.selectedChat.messages.push(...data.messages)
+            }
+        } else {
+            const fMessage = Array.isArray(state.selectedChat.messages) && state.selectedChat.messages.length ? state.selectedChat.messages[0] : null
+            const lMessage = data.messages.pop()
+            if(!fMessage || fMessage.id !== lMessage.id) state.selectedChat.messages = data.messages
+            else state.selectedChat.messages.unshift(...data.messages)
+        }
         // if (!!user.messages)
         //     user.messages.push(message);
         // else
         //     user.messages = [message];
         // state.selectedChat.messages.unshift(...messages);
-        state.selectedChat.messages = messages.concat(!!state.selectedChat.messages ? state.selectedChat.messages : [])
+        // state.selectedChat.messages = data.messages.concat(!!state.selectedChat.messages ? state.selectedChat.messages : [])
     },
     newMessage(state, data) {
         let {message, authUser} = data;
@@ -236,6 +270,7 @@ const mutations = {
                 let user = group.users.find(user => user.agent_id === chat_agent_id);
                 if(user) {
                     if (message.unread) user.unread_count = +user.unread_count + 1;
+                    user.lastMessage = message;
                     if (!!user.messages)
                         user.messages.push(message);
                     else
@@ -253,6 +288,7 @@ const mutations = {
             selected = selectedChat.id === skillGroup.id;
             if(skillGroup) {
                 if (message.unread) skillGroup.unread_count = +skillGroup.unread_count + 1;
+                skillGroup.lastMessage = message;
                 if (!!skillGroup.messages)
                     skillGroup.messages.push(message);
                 else
@@ -286,6 +322,9 @@ const mutations = {
             if (skillGroup) readMessageChat(authUser, skillGroup, message);
         }
     },
+    readMessages(state) {
+        state.selectedChat.unread_count = 0
+    },
     toggleChatSidebarHandler(state, val) {
         state.chatSidebar = val;
     }
@@ -293,6 +332,10 @@ const mutations = {
 
 function readMessageChat(authUser, chat, message) {
     if (message.id_sender !== authUser.agent_id) chat.unread_count = +chat.unread_count > 0 ? (+chat.unread_count - 1) : 0;
+    if(chat.lastMessage) {
+        if (chat.lastMessage.id_sender !== authUser.agent_id) chat.lastMessage.unread = false;
+        else chat.lastMessage.notread_count = +chat.lastMessage.notread_count > 0 ? (+chat.lastMessage.notread_count - 1) : 0;
+    }
     if (!!chat.messages) {
         let mess = chat.messages.find(mess => mess.id === message.id);
         if(mess) {

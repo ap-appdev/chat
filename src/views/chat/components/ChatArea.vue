@@ -76,11 +76,23 @@
 							<div slot="no-results"></div>
 						</infinite-loading>
 						<chat-area-body v-scroll:#scroll-area-body="onScroll" :type="selectedChat.type" :messages="selectedChat.messages" :unread_count="selectedChat.unread_count" :height="chatBodyHeight" @scrollTo="scrollTo"></chat-area-body>
-					</vue-perfect-scrollbar>
+            <infinite-loading v-if="infiniteLoadBottom" direction="bottom" :distance="200" @infinite="infiniteMessagesBottom">
+              <div slot="spinner" class="mb-7"><single-chat-loader></single-chat-loader></div>
+              <div slot="no-more"></div>
+              <div slot="no-results"></div>
+            </infinite-loading>
+          </vue-perfect-scrollbar>
 					<transition name="fade">
-						<v-btn v-show="showScrollToEnd" fab small class="v-btn--absolute v-btn--right" style="bottom: 16px" @click.stop="scrollToEnd">
-							<v-icon color="grey" size="32">mdi-chevron-down</v-icon>
-						</v-btn>
+            <div v-show="showScrollToEnd" class="v-btn--absolute v-btn--right" style="bottom: 16px">
+              <div v-if="!!selectedChat.unread_count" class="d-flex justify-center align-center mb-1">
+                <v-chip x-small class="primary">{{selectedChat.unread_count}}</v-chip>
+              </div>
+              <div class="d-flex justify-center align-center">
+                <v-btn fab small @click.stop="scrollToEnd">
+                  <v-icon color="grey" size="32">mdi-chevron-down</v-icon>
+                </v-btn>
+              </div>
+            </div>
 					</transition>
 				</div>
 				<div class="chat-footer pa-4" ref="chatFooter" v-if="selectedChat.check.write">
@@ -209,13 +221,13 @@ export default {
 		},
 		showScrollToEnd: function () {
 			if(this.scrollHeight && this.scrollPosition !== null) {
-				return this.scrollHeight >= (this.scrollPosition + this.offsetHeight + 1000)
+				return this.scrollHeight >= (this.scrollPosition + this.offsetHeight + 1000) || this.selectedChat.unread_count
 			} else return false
 		}
 	},
 	data() {
 		return {
-			infiniteLoad: false,
+      infiniteLoadBottom: false,
 			valid: false,
 			filesRules: [v => !!v || this.$t('message.requiredFiles')],
 			settings: {
@@ -246,6 +258,7 @@ export default {
 		selectedChat: {
 			handler: function (after, before) {
 				if(after !== before) {
+          this.infiniteLoadBottom = false
 					this.newMessage = '';
 					this.showDate = '';
 				}
@@ -314,7 +327,14 @@ export default {
 			}
 		},
 		scrollToEnd() {
-			if(this.lastMessage) this.scrollTo('#message-' + this.lastMessage.id)
+		  if(!!this.selectedChat.unread_count) {
+        this.$store.dispatch("readMessages").then(() => {
+          this.$store.dispatch("getMessages", { reload: true }).then(() => {
+            this.scrollTo('#message-' + this.lastMessage.id)
+          });
+        });
+      }
+			else if(this.lastMessage) this.scrollTo('#message-' + this.lastMessage.id)
 		},
 		scrollTo (el) {
 			this.$vuetify.goTo(el, {
@@ -341,6 +361,18 @@ export default {
 		infiniteMessages($state) {
 			setTimeout(() => {
 				this.$store.dispatch("getMessages").then((messages) => {
+				  this.infiniteLoadBottom = true
+					if (messages.length) {
+						$state.loaded();
+					} else {
+						$state.complete();
+					}
+				});
+			}, 1000);
+		},
+		infiniteMessagesBottom($state) {
+			setTimeout(() => {
+				this.$store.dispatch("getMessages", { reverse: true }).then((messages) => {
 					if (messages.length) {
 						$state.loaded();
 					} else {

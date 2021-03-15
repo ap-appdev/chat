@@ -130,16 +130,16 @@
 			// },
 			recentChats() {
 				if(!this.skillGroups) return {count: 0, chats: []};
-				let chats = this.skillGroups.filter(group => !!group.messages && group.messages.length > 0);
+				let chats = this.skillGroups.filter(group => !!group.lastMessage);
 				this.skillGroups.forEach(function (group) {
-					let users = group.users.filter(user => !!user.messages && user.messages.length > 0);
+					let users = group.users.filter(user => !!user.lastMessage);
 					users.forEach(user => {
 						if(chats.findIndex(item => item.agent_id === user.agent_id) === -1) chats.push(user);
 					});
 				});
 				return chats.sort((a, b) => {
-					let aDate = a.messages[a.messages.length - 1].date;
-					let bDate = b.messages[b.messages.length - 1].date;
+					let aDate = a.lastMessage.date;
+					let bDate = b.lastMessage.date;
 					return (convertDateToTimeStamp(aDate, 'YYYY-MM-DDTHH:mm:ss.SSS') < convertDateToTimeStamp(bDate, 'YYYY-MM-DDTHH:mm:ss.SSS')) ? 1 : -1;
 				});
 			}
