@@ -299,7 +299,7 @@ const mutations = {
                 notify.data.title = message.fio_sender;
             }
         }
-        if(message.id_sender !== authUser.agent_id && !selected) {
+        if(message.id_sender !== authUser.agent_id && (!selected || !document.hasFocus())) {
             Vue.notify({
                 group: 'message',
                 type: 'success',
@@ -334,7 +334,6 @@ function readMessageChat(authUser, chat, message) {
     if (message.id_sender !== authUser.agent_id) chat.unread_count = +chat.unread_count > 0 ? (+chat.unread_count - 1) : 0;
     if(chat.lastMessage) {
         if (chat.lastMessage.id_sender !== authUser.agent_id) chat.lastMessage.unread = false;
-        else chat.lastMessage.notread_count = +chat.lastMessage.notread_count > 0 ? (+chat.lastMessage.notread_count - 1) : 0;
     }
     if (!!chat.messages) {
         let mess = chat.messages.find(mess => mess.id === message.id);

@@ -19,6 +19,7 @@
 				animation-name="v-fade-left"
 		>
 			<template slot="body" slot-scope="props">
+        {{sendNotification(props)}}
 				<div class="custom-template">
 					<div class="custom-template-icon">
 						<i class="zmdi zmdi-comment-alt-text"></i>
@@ -26,7 +27,6 @@
 					<div class="custom-template-content">
 						<div class="custom-template-title">
 							{{props.item.title}}
-
 							<div class="float-right">
 								{{props.item.data.title}}
 							</div>
